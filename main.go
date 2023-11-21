@@ -8,18 +8,21 @@ import (
     "os"
 )
 
-func tcp(addr string) error {
+func tcp(addr string) (time.Duration, error) {
     var d net.Dialer
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second * 2)
 	defer cancel()
 
-
+    start := time.Now()
     conn, err := d.DialContext(ctx, "tcp", addr)
+    end := time.Now()
+    elapsed := end.Sub(start)
     if err != nil {
-        return err
+        return elapsed, err
     }
     conn.Close()
-    return nil
+
+    return elapsed, nil
 }
 
 func main() {
@@ -28,9 +31,9 @@ func main() {
         os.Exit(1)
     }
 
-    if check := tcp(os.Args[1]); check != nil {
-        fmt.Printf("✘ %s\n", os.Args[1])
+    if t, check := tcp(os.Args[1]); check != nil {
+        fmt.Printf("✘ %s [%s]\n", os.Args[1], t.Round(time.Millisecond))
     } else {
-        fmt.Printf("✔ %s\n", os.Args[1])
+        fmt.Printf("✔ %s [%s]\n", os.Args[1], t.Round(time.Millisecond))
     }
 }
