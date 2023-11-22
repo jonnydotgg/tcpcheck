@@ -10,7 +10,7 @@ import (
 
 func results(r bool, ep string, t time.Duration) {
     if r {
-        fmt.Printf("✔  %s [%s]\n", ep, t.Round(time.Millisecond))
+        fmt.Printf("✔ %s [%s]\n", ep, t.Round(time.Millisecond))
     } else {
         fmt.Printf("✘ %s [%s]\n", ep, t.Round(time.Millisecond))
     }
