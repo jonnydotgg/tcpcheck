@@ -34,7 +34,7 @@ func tcp(addr string) (time.Duration, error) {
 }
 
 func main() {
-    if len(os.Args) < 1 {
+    if len(os.Args) < 2 {
         fmt.Println("Expected a target\nExample: jonny.gg:443")
         os.Exit(1)
     }
