@@ -34,11 +34,13 @@ func tcp(addr string) (time.Duration, error) {
 }
 
 func main() {
+    // Check we have enough arguments to do anything
     if len(os.Args) < 2 {
         fmt.Println("Expected a target\nExample: jonny.gg:443")
         os.Exit(1)
     }
 
+    // check for flags and build slice of endpoints
     var loop bool
     var endpoints []string
     for _, arg := range os.Args[1:] {
