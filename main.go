@@ -8,6 +8,14 @@ import (
     "os"
 )
 
+func results(r bool, ep string, t time.Duration) {
+    if r {
+        fmt.Printf("✔  %s [%s]\n", ep, t.Round(time.Millisecond))
+    } else {
+        fmt.Printf("✘ %s [%s]\n", ep, t.Round(time.Millisecond))
+    }
+}
+
 func tcp(addr string) (time.Duration, error) {
     var d net.Dialer
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second * 2)
@@ -33,18 +41,18 @@ func main() {
 
     if len(os.Args) == 3 && os.Args[2] == "-l" {
         for {
-            if t, check := tcp(os.Args[1]); check != nil {
-                fmt.Printf("✘ %s [%s]\n", os.Args[1], t.Round(time.Millisecond))
+            if t, err := tcp(os.Args[1]); err == nil {
+                results(true, os.Args[1], t)
             } else {
-                fmt.Printf("✔ %s [%s]\n", os.Args[1], t.Round(time.Millisecond))
+                results(false, os.Args[1], t)
             }
             time.Sleep(time.Second * 1)
         }
     }
 
-    if t, check := tcp(os.Args[1]); check != nil {
-        fmt.Printf("✘ %s [%s]\n", os.Args[1], t.Round(time.Millisecond))
+    if t, err := tcp(os.Args[1]); err == nil {
+        results(true, os.Args[1], t)
     } else {
-        fmt.Printf("✔ %s [%s]\n", os.Args[1], t.Round(time.Millisecond))
+        results(false, os.Args[1], t)
     }
 }
