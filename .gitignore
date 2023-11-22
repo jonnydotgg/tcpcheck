@@ -20,7 +20,7 @@
 # Go workspace file
 go.work
 
-# tcpcheck specific
-tcpcheck
+# tcptest specific
+tcptest
 todo
 *.temp
