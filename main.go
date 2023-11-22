@@ -65,9 +65,11 @@ func main() {
         }
     }
 
-    if t, err := tcp(os.Args[1]); err == nil {
-        results(true, os.Args[1], t)
-    } else {
-        results(false, os.Args[1], t)
+    for _, ep := range endpoints {
+        if t, err := tcp(ep); err == nil {
+            results(true, ep, t)
+        } else {
+            results(false, ep, t)
+        }
     }
 }
