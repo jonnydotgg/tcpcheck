@@ -8,11 +8,23 @@ import (
     "os"
 )
 
+var loop bool
+var colours bool
+var endpoints []string
+
 func results(r bool, ep string, t time.Duration) {
     if r {
-        fmt.Printf("✔ %s [%s]\n", ep, t.Round(time.Millisecond))
+        if colours {
+            fmt.Printf("\033[0;32m✔\033[0m %s [%s]\n", ep, t.Round(time.Millisecond))
+        } else {
+            fmt.Printf("✔ %s [%s]\n", ep, t.Round(time.Millisecond))
+        }
     } else {
-        fmt.Printf("✘ %s [%s]\n", ep, t.Round(time.Millisecond))
+        if colours {
+            fmt.Printf("\033[0;31m✘\033[0m %s [%s]\n", ep, t.Round(time.Millisecond))
+        } else {
+            fmt.Printf("✘ %s [%s]\n", ep, t.Round(time.Millisecond))
+        }
     }
 }
 
@@ -41,11 +53,13 @@ func main() {
     }
 
     // check for flags and build slice of endpoints
-    var loop bool
-    var endpoints []string
+    colours = true
     for _, arg := range os.Args[1:] {
         if arg == "-l" {
             loop = true
+            continue
+        } else if arg == "--no-colours" {
+            colours = false
             continue
         }
         endpoints = append(endpoints, arg)

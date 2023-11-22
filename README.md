@@ -33,3 +33,9 @@ $ tcptest jonny.gg:443 -l
 ✔ jonny.gg:443 [32ms]
 ...
 ```
+
+disable colours use the `--no-colours` flag.
+```bash
+$ tcptest jonny.gg:443 --no-colours
+✔  jonny.gg:443 [47ms]
+```
