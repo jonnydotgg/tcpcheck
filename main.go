@@ -10,39 +10,47 @@ import (
 
 var loop bool
 var colours bool
-var endpoints []string
+var endpoints []*endpoint
 
-func results(r bool, ep string, t time.Duration) {
-    if r {
+type endpoint struct {
+    success bool
+    addr    string
+    time    time.Duration
+}
+
+func results(ep endpoint) {
+    if ep.success {
         if colours {
-            fmt.Printf("\033[0;32m✔\033[0m %s [%s]\n", ep, t.Round(time.Millisecond))
+            fmt.Printf("\033[0;32m✔\033[0m %s [%s]\n", ep.addr, ep.time.Round(time.Millisecond))
         } else {
-            fmt.Printf("✔ %s [%s]\n", ep, t.Round(time.Millisecond))
+            fmt.Printf("✔ %s [%s]\n", ep.addr, ep.time.Round(time.Millisecond))
         }
     } else {
         if colours {
-            fmt.Printf("\033[0;31m✘\033[0m %s [%s]\n", ep, t.Round(time.Millisecond))
+            fmt.Printf("\033[0;31m✘\033[0m %s [%s]\n", ep.addr, ep.time.Round(time.Millisecond))
         } else {
-            fmt.Printf("✘ %s [%s]\n", ep, t.Round(time.Millisecond))
+            fmt.Printf("✘ %s [%s]\n", ep.addr, ep.time.Round(time.Millisecond))
         }
     }
 }
 
-func tcp(addr string) (time.Duration, error) {
+func tcp(ep *endpoint) (error) {
     var d net.Dialer
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second * 2)
 	defer cancel()
 
     start := time.Now()
-    conn, err := d.DialContext(ctx, "tcp", addr)
+    conn, err := d.DialContext(ctx, "tcp", ep.addr)
     end := time.Now()
-    elapsed := end.Sub(start)
+    ep.time = end.Sub(start)
     if err != nil {
-        return elapsed, err
+        ep.success = false
+        return err
     }
     conn.Close()
+    ep.success = true
 
-    return elapsed, nil
+    return nil
 }
 
 func main() {
@@ -62,28 +70,31 @@ func main() {
             colours = false
             continue
         }
-        endpoints = append(endpoints, arg)
+        endpoints = append(endpoints, &endpoint{addr: arg})
     }
 
-
+    // start tcptest loop if it's a loop
     if loop {
         for {
             for _, ep := range endpoints {
-                if t, err := tcp(ep); err == nil {
-                    results(true, ep, t)
+                err := tcp(ep)
+                if err == nil {
+                    results(*ep)
                 } else {
-                    results(false, ep, t)
+                    results(*ep)
                 }
             }
         time.Sleep(time.Second * 1)
         }
     }
 
+    // if not just do the test once
     for _, ep := range endpoints {
-        if t, err := tcp(ep); err == nil {
-            results(true, ep, t)
+        err := tcp(ep)
+        if err == nil {
+            results(*ep)
         } else {
-            results(false, ep, t)
+            results(*ep)
         }
     }
 }
