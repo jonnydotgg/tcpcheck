@@ -6,6 +6,7 @@ import (
     "net"
     "time"
     "os"
+    "strings"
 )
 
 var loop bool
@@ -18,18 +19,20 @@ type endpoint struct {
     time    time.Duration
 }
 
-func results(ep endpoint) {
+func results(ep endpoint, p int) {
+    var padding string
+    padding = strings.Repeat(" ", p - len(ep.addr))
     if ep.success {
         if colours {
-            fmt.Printf("\033[0;32m✔\033[0m %s [%s]\n", ep.addr, ep.time.Round(time.Millisecond))
+            fmt.Printf("\033[0;32m✔\033[0m %s%s [%s]\n", ep.addr, padding, ep.time.Round(time.Millisecond))
         } else {
-            fmt.Printf("✔ %s [%s]\n", ep.addr, ep.time.Round(time.Millisecond))
+            fmt.Printf("✔ %s%s [%s]\n", ep.addr, padding, ep.time.Round(time.Millisecond))
         }
     } else {
         if colours {
-            fmt.Printf("\033[0;31m✘\033[0m %s [%s]\n", ep.addr, ep.time.Round(time.Millisecond))
+            fmt.Printf("\033[0;31m✘\033[0m %s%s [%s]\n", ep.addr, padding, ep.time.Round(time.Millisecond))
         } else {
-            fmt.Printf("✘ %s [%s]\n", ep.addr, ep.time.Round(time.Millisecond))
+            fmt.Printf("✘ %s%s [%s]\n", ep.addr, padding, ep.time.Round(time.Millisecond))
         }
     }
 }
@@ -61,6 +64,7 @@ func main() {
     }
 
     // check for flags and build slice of endpoints
+    var padding int
     colours = true
     for _, arg := range os.Args[1:] {
         if arg == "-l" {
@@ -71,6 +75,10 @@ func main() {
             continue
         }
         endpoints = append(endpoints, &endpoint{addr: arg})
+        // set padding size
+        if len(arg) > padding {
+            padding = len(arg)
+        }
     }
 
     // start tcptest loop if it's a loop
@@ -79,9 +87,9 @@ func main() {
             for _, ep := range endpoints {
                 err := tcp(ep)
                 if err == nil {
-                    results(*ep)
+                    results(*ep, padding)
                 } else {
-                    results(*ep)
+                    results(*ep, padding)
                 }
             }
         time.Sleep(time.Second * 1)
@@ -92,9 +100,9 @@ func main() {
     for _, ep := range endpoints {
         err := tcp(ep)
         if err == nil {
-            results(*ep)
+            results(*ep, padding)
         } else {
-            results(*ep)
+            results(*ep, padding)
         }
     }
 }
